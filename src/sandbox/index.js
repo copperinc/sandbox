@@ -58,7 +58,10 @@ function start (args = {}, callback) {
  * Shut everything down
  */
 function end (callback) {
-  return _end({ events, http, tables }, callback)
+  inv({}, function (err, inventory) {
+    if (err) callback(err)
+    else _end({ events, http, inventory, tables }, callback)
+  })
 }
 
 module.exports = { events, http, tables, start, end }

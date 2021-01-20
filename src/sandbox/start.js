@@ -82,6 +82,39 @@ module.exports = function _start (params, callback) {
       http.start(params, callback)
     },
 
+    // Kick off any macro sandbox services
+    function _macro (callback) {
+      if (inv.macros) {
+        let macroServices = inv.macros.map(name => {
+          let macroPath = null
+          let localPath = join(process.cwd(), 'src', 'macros', `${name}.js`)
+          let localPath1 = join(process.cwd(), 'src', 'macros', name)
+          let modulePath = join(process.cwd(), 'node_modules', name)
+          let modulePath1 = join(process.cwd(), 'node_modules', `@${name}`)
+          if (exists(localPath)) macroPath = localPath
+          else if (exists(localPath1)) macroPath = localPath1
+          else if (exists(modulePath)) macroPath = modulePath
+          else if (exists(modulePath1)) macroPath = modulePath1
+          // eslint-disable-next-line
+          let macro = require(macroPath)
+          return macro.start
+        }).filter(start => start)
+        if (macroServices.length) {
+          series(macroServices, function (err) {
+            if (err) callback(err)
+            else {
+              update.done('Macro sandbox services started.')
+              callback()
+            }
+          })
+        }
+        else callback()
+      }
+      else {
+        callback()
+      }
+    },
+
     // Print startup time
     function _ready (callback) {
       let finish = Date.now()
