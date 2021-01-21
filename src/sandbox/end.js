@@ -45,7 +45,7 @@ module.exports = function end (server, callback) {
           // eslint-disable-next-line
           let macro = require(macroPath)
           return macro.end
-        }).filter(end => end)
+        }).filter(end => end).map(end => end(inventory))
         if (macroServices.length) {
           series(macroServices, function (err) {
             if (err) callback(err)
